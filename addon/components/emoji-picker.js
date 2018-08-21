@@ -43,7 +43,6 @@ export default Component.extend({
 
     this.set('_activeCategory', 0);
     this.get('$scroller').scrollTop(0);
-    // this.set('_searchQuery', null);
   },
 
   _searchResults: computed('_searchQueryFormatted', function() {
