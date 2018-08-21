@@ -152,7 +152,6 @@ export default Component.extend({
 
   actions: {
     selectEmoji(emoji) {
-      console.log(emoji);
       this.sendAction('onSelectEmoji', emoji);
     },
 
