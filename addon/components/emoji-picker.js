@@ -73,12 +73,12 @@ export default Component.extend({
     run.next(() => $(window).trigger('resize'));
 
     if (!this.get('_isSearchMode')) {
+      this.set('_activeCategory', 0);
       this._onLeaveSearch();
     }
   }),
 
   _onLeaveSearch() {
-    this.set('_activeCategory', 0);
     this._getRecentEmoji();
   },
 
@@ -205,9 +205,9 @@ export default Component.extend({
         this._onLeaveSearch();
       }
 
+      this.set('_activeCategory', categoryIndex);
       run.next(() => {
         $scroller.scrollTop($categories.eq(categoryIndex).position().top + $scroller.scrollTop());
-        this.set('_activeCategory', categoryIndex);
       });
     }
   },
