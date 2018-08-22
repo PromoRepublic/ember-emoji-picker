@@ -28,7 +28,8 @@
     "ember-cli-htmlbars": "^2.0.1",
     "ember-cli-less": "^2.0.1",
     "ember-cli-nanoscroll": "^0.1.5",
-    "emojilib": "^2.3.0"
+    "emojilib": "^2.3.0",
+    "ember-local-storage": "^1.4.2"
   },
   "devDependencies": {
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
@@ -47,7 +48,6 @@
     "ember-disable-prototype-extensions": "^1.1.2",
     "ember-export-application-global": "^2.0.0",
     "ember-load-initializers": "^1.0.0",
-    "ember-local-storage": "^1.4.2",
     "ember-resolver": "^4.0.0",
     "ember-source": "~2.16.0",
     "ember-truth-helpers": "^2.1.0",
