@@ -19,7 +19,7 @@ export default Component.extend({
 
   showRecent: true,
   maxRecentCount: computed('perRow', function() {
-    return 2 * this.get('perRow');
+    return 3 * this.get('perRow');
   }),
 
   init() {
@@ -71,6 +71,8 @@ export default Component.extend({
   _searchObserver: observer('_isSearchMode', function() {
     //for nano scroll
     run.next(() => $(window).trigger('resize'));
+
+    this.get('$scroller').scrollTop(0);
 
     if (!this.get('_isSearchMode')) {
       this.set('_activeCategory', 0);
@@ -134,8 +136,7 @@ export default Component.extend({
 
   _getRecentEmoji() {
     const emoji = Object.entries(this.get('recent.content'))
-      .sort(([name1, count2], [name2, count1]) => count1 - count2)
-      .slice(0, this.get('maxRecentCount'))
+      .sort((entry1, entry2) => entry2[1] - entry1[1])
       .map(([name]) => Object.assign({ name }, emojiHash[name]));
 
     this.set('recentEmoji', { name: RECENT_KEY, emoji });
@@ -176,16 +177,30 @@ export default Component.extend({
 
   _updateRecent(emoji) {
     const
-      key = `recent.${emoji.name}`,
-      currentRecord = this.get(key);
+      stored = this.get('recent.content'),
+      timeStamp = Date.now();
 
-    let count = 1;
+    stored[emoji.name] = timeStamp;
 
-    if (currentRecord) {
-      count = this.get(`${key}`) + 1;
+    const
+      entries = Object.entries(stored);
+
+    if (entries.length > this.get('maxRecentCount')) {
+      const sorted = entries.sort((entry1, entry2) => entry2[1] - entry1[1]);
+
+      this.get('recent').clear();
+      for (let i = 0; i < sorted.length; i++) {
+        const [name, stamp] = sorted[i];
+
+        if (i >= this.get('maxRecentCount')) {
+          break;
+        }
+
+        this.set(`recent.${name}`, stamp);
+      }
+    } else {
+      this.set(`recent.${emoji.name}`, timeStamp);
     }
-
-    this.set(key, count)
   },
 
   actions: {
@@ -197,18 +212,20 @@ export default Component.extend({
 
     navigate(categoryIndex) {
       const
-        { $scroller, $categories } = this.getProperties('$scroller', '$categories');
-
-      this.set('_searchQuery', null);
+        { $scroller, $categories } = this.getProperties('$scroller', '$categories'),
+        scrollToCategory = () => {
+          $scroller.scrollTop($categories.eq(categoryIndex).position().top + $scroller.scrollTop());
+        };
 
       if (this.get('_isSearchMode')) {
+        this.set('_searchQuery', null);
         this._onLeaveSearch();
+        run.next(scrollToCategory);
+      } else {
+        scrollToCategory();
       }
 
       this.set('_activeCategory', categoryIndex);
-      run.next(() => {
-        $scroller.scrollTop($categories.eq(categoryIndex).position().top + $scroller.scrollTop());
-      });
     }
   },
 
@@ -216,3 +233,5 @@ export default Component.extend({
 });
 
 const formatString = string => string.toLowerCase().split(/[\s|,|\-|_|:]+/).filter(word => word.length);
+
+

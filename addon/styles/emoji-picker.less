@@ -59,10 +59,12 @@
 }
 
 .eep-select__sections {
-  display: none;
+  height: 0;
+  overflow: hidden;
 
   &.is-active {
-    display: block;
+    height: auto;
+    overflow: visible;
   }
 }
 
@@ -72,12 +74,22 @@
 
 .eep-select-section__name {
   position: sticky;
-  top: -1px;
+  top: 0;
   line-height: 1.4;
-  background: rgba(255, 255, 255, .95);
   z-index: 2;
   padding: 2*@grid 2*@grid;
   margin: 0 2*@grid;
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, .95);
+    z-index: -1;
+  }
 }
 
 .eep-symbols {
@@ -88,6 +100,7 @@
   margin: 0 -2*@grid;
   padding: 0 4*@grid;
 }
+
 .eep-symbols--no-found {
   margin: 0;
 }
@@ -178,6 +191,12 @@
 
   &:last-child {
     border-bottom: 0;
+    .eep-nav__item {
+      padding-bottom: @active-nav-border-width;
+      &:before {
+        bottom: 0;
+      }
+    }
   }
 }
 
