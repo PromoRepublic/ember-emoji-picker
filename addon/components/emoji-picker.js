@@ -14,13 +14,10 @@ export default Component.extend({
   recent: storageFor('recent'),
 
   doesClientSupportsEmoji: detectEmojiSupport(),
-  maxSearchResultsCount: 75,
-  perRow: 7,
+  maxSearchResultsCount: 84,
 
   showRecent: true,
-  maxRecentCount: computed('perRow', function() {
-    return 3 * this.get('perRow');
-  }),
+  maxRecentCount: 21,
 
   init() {
     this._super(...arguments);
@@ -137,7 +134,8 @@ export default Component.extend({
   _getRecentEmoji() {
     const emoji = Object.entries(this.get('recent.content'))
       .sort((entry1, entry2) => entry2[1] - entry1[1])
-      .map(([name]) => Object.assign({ name }, emojiHash[name]));
+      .map(([name]) => Object.assign({ name }, emojiHash[name]))
+      .slice(0, this.get('maxRecentCount'));
 
     this.set('recentEmoji', { name: RECENT_KEY, emoji });
   },
@@ -189,12 +187,8 @@ export default Component.extend({
       const sorted = entries.sort((entry1, entry2) => entry2[1] - entry1[1]);
 
       this.get('recent').clear();
-      for (let i = 0; i < sorted.length; i++) {
+      for (let i = 0; i < this.get('maxRecentCount'); i++) {
         const [name, stamp] = sorted[i];
-
-        if (i >= this.get('maxRecentCount')) {
-          break;
-        }
 
         this.set(`recent.${name}`, stamp);
       }
