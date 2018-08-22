@@ -3,17 +3,53 @@ import { run } from '@ember/runloop';
 import { computed, observer } from '@ember/object';
 import layout from '../templates/components/emoji-picker';
 import detectEmojiSupport from 'npm:detect-emoji-support';
-import { allEmoji, emojiHash, getEmojiByCategories } from '../data';
+import { allEmoji, CATEGORIES, emojiHash, getEmojiByCategories } from '../data';
 import icons from '../svg';
 import $ from 'jquery';
+import { storageFor } from 'ember-local-storage/helpers/storage';
 
-const
-  { alias } = computed,
-  RECENT_KEY = 'recent';
+const RECENT_KEY = 'recent';
 
 export default Component.extend({
+  recent: storageFor('recent'),
+
   doesClientSupportsEmoji: detectEmojiSupport(),
   maxSearchResultsCount: 75,
+  perRow: 7,
+
+  showRecent: true,
+  maxRecentCount: computed('perRow', function() {
+    return 2 * this.get('perRow');
+  }),
+
+  init() {
+    this._super(...arguments);
+
+    const
+      emojiByCategories = [...getEmojiByCategories()],
+      categories = [];
+
+    if (this.get('showRecent')) {
+      this._getRecentEmoji();
+
+      categories.push({
+        name: RECENT_KEY,
+        icon: icons[RECENT_KEY]
+      });
+    }
+
+    categories.push(...CATEGORIES.map(name => ({
+      name,
+      icon: icons[name]
+    })));
+
+    this.setProperties({
+      emojiByCategories,
+      categories
+    });
+
+    this._checkScroll = this._checkScroll.bind(this);
+  },
 
   _activeCategory: 0,
   _searchQuery: null,
@@ -28,21 +64,22 @@ export default Component.extend({
     return formatString(query);
   }),
 
-  _isSearchMode: alias('_searchQueryFormatted'),
+  _isSearchMode: computed('_searchQueryFormatted', function() {
+    return !!this.get('_searchQueryFormatted');
+  }),
 
   _searchObserver: observer('_isSearchMode', function() {
     //for nano scroll
-
     run.next(() => $(window).trigger('resize'));
 
-    this._exitFromSearch();
+    if (!this.get('_isSearchMode')) {
+      this._onLeaveSearch();
+    }
   }),
 
-  _exitFromSearch() {
-    if (!this.get('_isSearchMode')) return;
-
+  _onLeaveSearch() {
     this.set('_activeCategory', 0);
-    this.get('$scroller').scrollTop(0);
+    this._getRecentEmoji();
   },
 
   _searchResults: computed('_searchQueryFormatted', function() {
@@ -96,24 +133,12 @@ export default Component.extend({
   }),
 
   _getRecentEmoji() {
-    return [];
-  },
+    const emoji = Object.entries(this.get('recent.content'))
+      .sort(([name1, count2], [name2, count1]) => count1 - count2)
+      .slice(0, this.get('maxRecentCount'))
+      .map(([name]) => Object.assign({ name }, emojiHash[name]));
 
-  init() {
-    this._super(...arguments);
-
-    const emojiByCategories = [{ name: RECENT_KEY, emoji: this._getRecentEmoji() }, ...getEmojiByCategories()];
-
-    this.setProperties({
-      emojiByCategories,
-      categories: emojiByCategories
-        .map(category => ({
-          name: category.name,
-          icon: icons[category.name]
-        }))
-    });
-
-    this._checkScroll = this._checkScroll.bind(this);
+    this.set('recentEmoji', { name: RECENT_KEY, emoji });
   },
 
   didInsertElement() {
@@ -149,20 +174,41 @@ export default Component.extend({
     this.set('_activeCategory', activeCategory);
   },
 
+  _updateRecent(emoji) {
+    const
+      key = `recent.${emoji.name}`,
+      currentRecord = this.get(key);
+
+    let count = 1;
+
+    if (currentRecord) {
+      count = this.get(`${key}`) + 1;
+    }
+
+    this.set(key, count)
+  },
+
   actions: {
     selectEmoji(emoji) {
       this.sendAction('onSelectEmoji', emoji);
+
+      this._updateRecent(emoji);
     },
 
     navigate(categoryIndex) {
       const
         { $scroller, $categories } = this.getProperties('$scroller', '$categories');
 
-      this._exitFromSearch();
+      this.set('_searchQuery', null);
 
-      this.set('_activeCategory', categoryIndex);
+      if (this.get('_isSearchMode')) {
+        this._onLeaveSearch();
+      }
 
-      $scroller.scrollTop($categories.eq(categoryIndex).position().top + $scroller.scrollTop());
+      run.next(() => {
+        $scroller.scrollTop($categories.eq(categoryIndex).position().top + $scroller.scrollTop());
+        this.set('_activeCategory', categoryIndex);
+      });
     }
   },
 

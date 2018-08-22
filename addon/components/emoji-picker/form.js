@@ -6,7 +6,7 @@ export default Component.extend({
   tagName: 'label',
   classNames: ['eep-select__form'],
   _class: computed('class', function() {
-    let classString = 'eep-input';
+    let classString = 'eep-input form-control';
 
     if (this.get('class')) {
       classString += ` ${this.get('class')}`;

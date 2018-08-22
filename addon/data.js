@@ -16,10 +16,11 @@ export const CATEGORIES = [
 
 export const emojiHash = emoji.lib;
 
-export const allEmoji = Object.entries(emojiHash)
-  .map(([name, value]) => {
-    return Object.assign({}, { name }, value);
-  });
+export const emojiHashMapper = ([name, value]) => {
+  return Object.assign({}, { name }, value);
+};
+
+export const allEmoji = Object.entries(emojiHash).map(emojiHashMapper);
 
 /**
  *  all emojis in format
@@ -53,3 +54,5 @@ export const getEmojiByCategories = () => {
     return result;
   }, [])
 };
+
+export const DEFAULT_RECENT_EMOJI = ['wink', 'smile', 'star_struck'];
