@@ -152,7 +152,6 @@ export default Component.extend({
       $categories
     });
 
-    $scroller.on('mousewheel', this._checkScroll);
     $scroller.on('scroll', this._checkScroll);
   },
 
@@ -165,8 +164,6 @@ export default Component.extend({
     $categories.each((i, element) => {
       if ($(element).position().top <= 2) {
         activeCategory = i;
-      } else {
-        return false;
       }
     });
 
@@ -218,8 +215,6 @@ export default Component.extend({
       } else {
         scrollToCategory();
       }
-
-      this.set('_activeCategory', categoryIndex);
     }
   },
 
