@@ -14,6 +14,11 @@ export const CATEGORIES = [
   'flags',
 ];
 
+export const DEFAULT_TRANSLATIONS = {
+  noFound: 'No found',
+  searchResults: 'Search results'
+};
+
 export const emojiHash = emoji.lib;
 
 export const emojiHashMapper = ([name, value]) => {

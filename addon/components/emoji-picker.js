@@ -3,7 +3,7 @@ import { run } from '@ember/runloop';
 import { computed, observer } from '@ember/object';
 import layout from '../templates/components/emoji-picker';
 import detectEmojiSupport from 'npm:detect-emoji-support';
-import { allEmoji, CATEGORIES, emojiHash, getEmojiByCategories } from '../data';
+import { allEmoji, CATEGORIES, DEFAULT_TRANSLATIONS, emojiHash, getEmojiByCategories } from '../data';
 import icons from '../svg';
 import $ from 'jquery';
 import { storageFor } from 'ember-local-storage/helpers/storage';
@@ -40,10 +40,10 @@ export default Component.extend({
       icon: icons[name]
     })));
 
-    this.setProperties({
+    this.setProperties(Object.assign({}, {
       emojiByCategories,
       categories
-    });
+    }, !this.get('texts') ? DEFAULT_TRANSLATIONS : {}));
 
     this._checkScroll = this._checkScroll.bind(this);
   },
