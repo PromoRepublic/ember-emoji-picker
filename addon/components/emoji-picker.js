@@ -3,7 +3,7 @@ import { run } from '@ember/runloop';
 import { computed, observer } from '@ember/object';
 import layout from '../templates/components/emoji-picker';
 import detectEmojiSupport from 'npm:detect-emoji-support';
-import { allEmoji, CATEGORIES, DEFAULT_TRANSLATIONS, emojiHash, getEmojiByCategories } from '../data';
+import { allEmoji, CATEGORIES, DEFAULT_TRANSLATIONS, EMOJI_BY_CATEGORIES, emojiHash } from '../data';
 import icons from '../svg';
 import $ from 'jquery';
 import { storageFor } from 'ember-local-storage/helpers/storage';
@@ -23,7 +23,7 @@ export default Component.extend({
     this._super(...arguments);
 
     const
-      emojiByCategories = [...getEmojiByCategories()],
+      emojiByCategories = EMOJI_BY_CATEGORIES,
       categories = [];
 
     if (this.get('showRecent')) {
@@ -42,8 +42,9 @@ export default Component.extend({
 
     this.setProperties(Object.assign({}, {
       emojiByCategories,
-      categories
-    }, !this.get('texts') ? DEFAULT_TRANSLATIONS : {}));
+      categories,
+      texts: !this.get('texts') ? DEFAULT_TRANSLATIONS : {}
+    }));
 
     this._checkScroll = this._checkScroll.bind(this);
   },
@@ -202,6 +203,8 @@ export default Component.extend({
     },
 
     navigate(categoryIndex) {
+      this._getRecentEmoji();
+
       const
         { $scroller, $categories } = this.getProperties('$scroller', '$categories'),
         scrollToCategory = () => {

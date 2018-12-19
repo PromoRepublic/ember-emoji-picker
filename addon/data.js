@@ -37,7 +37,7 @@ export const allEmoji = Object.entries(emojiHash).map(emojiHashMapper);
  *    ...
  *  ]
  */
-export const getEmojiByCategories = () => {
+export const EMOJI_BY_CATEGORIES = (() => {
   const temp = CATEGORIES.reduce((result, category) => {
     result[category] = [];
 
@@ -50,14 +50,10 @@ export const getEmojiByCategories = () => {
     temp[category].push(Object.assign({}, emoji));
   });
 
-  return Object.entries(temp).reduce((result, [name, emoji]) => {
-    result.push({
-      name,
-      emoji
-    });
-
-    return result;
-  }, [])
-};
+  return Object.entries(temp).map(([name, emoji]) => ({
+    name,
+    emoji
+  }));
+})();
 
 export const DEFAULT_RECENT_EMOJI = ['wink', 'smile', 'star_struck'];
