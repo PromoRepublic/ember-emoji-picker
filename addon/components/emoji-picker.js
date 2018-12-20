@@ -144,6 +144,8 @@ export default Component.extend({
   didInsertElement() {
     this._super(...arguments);
 
+    this.renderAllEmojisList();
+
     const
       $scroller = this.$('.nano-content'),
       $categories = this.$('.js-eep-select-section');
@@ -154,6 +156,54 @@ export default Component.extend({
     });
 
     $scroller.on('scroll', this._checkScroll);
+
+    //refresh nanoscroller
+    $('.nano').nanoScroller();
+  },
+
+  renderAllEmojisList() {
+    const
+      dom = document.createDocumentFragment(),
+      texts = this.get('texts');
+
+    const emojiByCategories = this.get('emojiByCategories');
+
+    for (let i = 0; i < emojiByCategories.length; i++) {
+      const
+        category = emojiByCategories[i],
+        emojis = category.emoji,
+        section = document.createElement('div'),
+        categoryName = texts && texts[category.name] || category.name;
+
+      section.setAttribute('class', 'eep-select-section js-eep-select-section');
+
+      section.innerHTML = `
+        <div class="eep-select-section__name js-eep-select-section-name">${categoryName}</div>
+        <div class="eep-select-section__emoji">
+          <div class="eep-symbols">
+            
+          </div>
+        </div>
+      `;
+
+      const symbolsWrapper = section.querySelector('.eep-symbols');
+
+      for (let i = 0; i < emojis.length; i++) {
+        const
+          emoji = emojis[i],
+          element = document.createElement('div');
+
+        element.setAttribute('class', 'eep-symbols__item eep-emoji-font');
+        element.addEventListener('click', () => this.send('selectEmoji', emoji));
+        element.innerHTML = `<span>${emoji.char}</span>`;
+
+        symbolsWrapper.appendChild(element);
+      }
+
+      dom.appendChild(section);
+    }
+
+    this.$('.js-emoji-sections-wrap').get(0).appendChild(dom);
   },
 
   _checkScroll() {

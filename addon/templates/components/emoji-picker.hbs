@@ -34,6 +34,7 @@
         </div>
       </div>
     </div>
+
     <div class="eep-select__sections{{unless _isSearchMode ' is-active'}}">
       {{#if showRecent}}
         {{#emoji-picker/section category=recentEmoji texts=texts.categories}}
@@ -44,15 +45,9 @@
           {{/each}}
         {{/emoji-picker/section}}
       {{/if}}
-      {{#each emojiByCategories as |category|}}
-        {{#emoji-picker/section category=category texts=texts.categories}}
-          {{#each category.emoji as |emoji|}}
-            <div class="eep-symbols__item eep-emoji-font" {{action 'selectEmoji' emoji}}>
-              <span>{{emoji.char}}</span>
-            </div>
-          {{/each}}
-        {{/emoji-picker/section}}
-      {{/each}}
+
+      <div class="js-emoji-sections-wrap">
+      </div>
     </div>
   {{/emoji-picker/scroller}}
 </div>
