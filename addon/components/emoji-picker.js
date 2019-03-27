@@ -176,7 +176,7 @@ export default Component.extend({
         category = emojiByCategories[i],
         emojis = category.emoji,
         section = document.createElement('div'),
-        categoryName = texts && texts[category.name] || category.name;
+        categoryName = texts && texts.categories && texts.categories[category.name] || category.name;
 
       section.setAttribute('class', 'eep-select-section js-eep-select-section');
 
