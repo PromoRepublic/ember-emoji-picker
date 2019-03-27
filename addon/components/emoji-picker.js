@@ -43,8 +43,11 @@ export default Component.extend({
     this.setProperties(Object.assign({}, {
       emojiByCategories,
       categories,
-      texts: !this.get('texts') ? DEFAULT_TRANSLATIONS : {}
     }));
+
+    if (!this.get('texts')) {
+      this.set('texts', DEFAULT_TRANSLATIONS);
+    }
 
     this._checkScroll = this._checkScroll.bind(this);
   },
