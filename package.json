@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "detect-emoji-support": "^0.1.6",
-    "ember-browserify": "^1.2.2",
+    "ember-auto-import": "1.5.3",
     "ember-cli-babel": "^6.6.0",
     "ember-cli-htmlbars": "^2.0.1",
     "ember-cli-less": "^2.0.1",
