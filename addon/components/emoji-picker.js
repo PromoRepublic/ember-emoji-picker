@@ -2,7 +2,7 @@ import Component from '@ember/component';
 import { run } from '@ember/runloop';
 import { computed, observer } from '@ember/object';
 import layout from '../templates/components/emoji-picker';
-import detectEmojiSupport from 'npm:detect-emoji-support';
+import detectEmojiSupport from 'detect-emoji-support';
 import { allEmoji, CATEGORIES, DEFAULT_TRANSLATIONS, EMOJI_BY_CATEGORIES, emojiHash } from '../data';
 import icons from '../svg';
 import $ from 'jquery';
@@ -184,7 +184,7 @@ export default Component.extend({
         <div class="eep-select-section__name js-eep-select-section-name">${categoryName}</div>
         <div class="eep-select-section__emoji">
           <div class="eep-symbols">
-            
+
           </div>
         </div>
       `;

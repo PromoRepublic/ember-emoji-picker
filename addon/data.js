@@ -1,4 +1,4 @@
-import emoji from 'npm:emojilib';
+import emoji from 'emojilib';
 
 /**
  * category list with order
