@@ -1,5 +1,5 @@
 import Component from '@ember/component';
-import { computed } from '@ember/object';
+import { computed, action } from '@ember/object';
 import { bool } from '@ember/object/computed';
 import { htmlSafe } from '@ember/template';
 import layout from '../templates/components/emoji-picker';
@@ -141,6 +141,12 @@ export default Component.extend({
     this.buildObserver();
   },
 
+  didDestroyElement() {
+    this._super(...arguments);
+
+    this.get('scrollObserver').disconnect();
+  },
+
   _getRecentEmoji() {
     const emoji = Object.entries(this.get('recent.content'))
       .sort((entry1, entry2) => entry2[1] - entry1[1])
@@ -155,12 +161,13 @@ export default Component.extend({
     const scrollElements = this.element.querySelectorAll('[data-category]');
     const options = {
       root,
-      rootMargin: "0px",
+      rootMargin: '0px',
       threshold: [.14],
     };
 
-    const observer = new IntersectionObserver(this.handleScroll, options);
-    scrollElements.forEach(element => observer.observe(element));
+    const scrollObserver = new IntersectionObserver(this.handleScroll, options);
+    this.set('scrollObserver', scrollObserver);
+    scrollElements.forEach(element => scrollObserver.observe(element));
   },
 
   /**
@@ -195,28 +202,30 @@ export default Component.extend({
     }
   },
 
-  actions: {
-    selectEmoji(emoji) {
-      tryInvoke(this, 'onSelectEmoji', [emoji]);
+  @action
+  navigate(categoryName) {
+    this._getRecentEmoji();
 
-      this._updateRecent(emoji);
-    },
+    if (this.get('isSearchMode')) {
+      this.set('_searchQuery', null);
+    }
 
-    navigate(categoryName) {
+    const target = this.element.querySelector(`[data-category="${categoryName}"]`);
+    if (target) target.scrollIntoView({behavior: 'smooth'});
+  },
+
+  @action
+  selectEmoji(emoji) {
+    tryInvoke(this, 'onSelectEmoji', [emoji]);
+
+    this._updateRecent(emoji);
+  },
+
+  @action
+  triggerSearch(value) {
+    if (!value) {
       this._getRecentEmoji();
-
-      if (this.get('isSearchMode')) {
-        this.set('_searchQuery', null);
-      }
-
-      const target = this.element.querySelector(`[data-category="${categoryName}"]`);
-      if (target) target.scrollIntoView({behavior: 'smooth'});
-    },
-    triggerSearch(value) {
-      if (!value) {
-        this._getRecentEmoji();
-        this.element.querySelector('[data-category="recent"]').scrollIntoView();
-      }
+      this.element.querySelector('[data-category="recent"]').scrollIntoView();
     }
   },
 
