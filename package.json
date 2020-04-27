@@ -27,7 +27,6 @@
     "ember-cli-babel": "^6.6.0",
     "ember-cli-htmlbars": "^2.0.1",
     "ember-cli-less": "^2.0.1",
-    "ember-cli-nanoscroll": "^0.1.5",
     "emojilib": "^2.3.0",
     "ember-local-storage": "^1.4.2"
   },

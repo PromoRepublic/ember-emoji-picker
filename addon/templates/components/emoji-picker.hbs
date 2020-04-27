@@ -1,11 +1,11 @@
 <div class="eep-select">
   <div class="eep-select__navigation">
-    <div class="eep-nav{{if _isSearchMode ' eep-nav--search'}}">
+    <div class="eep-nav{{if isSearchMode ' eep-nav--search'}}">
       {{#each categories as |category index|}}
         {{emoji-picker/nav-item
             category=category
-            isActive=(and (not _isSearchMode) (eq index _activeCategory))
-            click=(action 'navigate' index)
+            isActive=(and (not isSearchMode) (eq category.name activeCategory))
+            click=(action "navigate" category.name)
         }}
       {{/each}}
     </div>
@@ -13,10 +13,11 @@
   {{emoji-picker/form
       value=_searchQuery
       placeholder=texts.searchPlaceholder
+      onChange=(action "triggerSearch")
   }}
 
-  {{#emoji-picker/scroller}}
-    <div class="eep-select__sections{{if _isSearchMode ' is-active'}}">
+  <div class="eep-select__scroller">
+    <div class="eep-select__sections{{if isSearchMode ' is-active'}}">
       <div class="eep-select-section">
         <div class="eep-select-section__name">{{texts.searchResults}}:</div>
         <div class="eep-select-section__emoji">
@@ -35,19 +36,41 @@
       </div>
     </div>
 
-    <div class="eep-select__sections{{unless _isSearchMode ' is-active'}}">
+    <div class="eep-select__sections{{unless isSearchMode ' is-active'}}">
       {{#if showRecent}}
-        {{#emoji-picker/section category=recentEmoji texts=texts.categories}}
-          {{#each recentEmoji.emoji as |emoji|}}
-            <div class="eep-symbols__item eep-emoji-font" {{action 'selectEmoji' emoji}}>
-              <span>{{emoji.char}}</span>
-            </div>
-          {{/each}}
-        {{/emoji-picker/section}}
+        <div data-category="recent">
+          {{#emoji-picker/section category=recentEmoji texts=texts.categories}}
+            {{#each recentEmoji.emoji as |emoji|}}
+              <div class="eep-symbols__item eep-emoji-font" {{action 'selectEmoji' emoji}}>
+                <span>{{emoji.char}}</span>
+              </div>
+            {{/each}}
+          {{/emoji-picker/section}}
+        </div>
       {{/if}}
 
       <div class="js-emoji-sections-wrap">
+        {{#each emojiByCategories as |category|}}
+          <div
+              class="eep-select-section js-eep-select-section"
+              data-category={{category.name}}>
+            <div class="eep-select-section__name js-eep-select-section-name">
+              {{or category.translate category.name}}
+            </div>
+            <div class="eep-select-section__emoji">
+              <div class="eep-symbols">
+                {{#each category.emoji as |emoji|}}
+                  <div
+                      class="eep-symbols__item eep-emoji-font"
+                      {{action "selectEmoji" emoji}}>
+                    <span>{{emoji.char}}</span>
+                  </div>
+                {{/each}}
+              </div>
+            </div>
+          </div>
+        {{/each}}
       </div>
     </div>
-  {{/emoji-picker/scroller}}
+  </div>
 </div>

@@ -1,5 +1,4 @@
 import Component from '@ember/component';
-// import { on } from '@ember/object';
 import layout from '../../templates/components/emoji-picker/nav-item';
 
 const BASE_CLASS = 'eep-nav__item';
