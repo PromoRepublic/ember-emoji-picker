@@ -1,5 +1,5 @@
 import Component from '@ember/component';
-import { computed } from '@ember/object';
+import { computed, set } from '@ember/object';
 import { bool } from '@ember/object/computed';
 import layout from '../templates/components/emoji-picker';
 import detectEmojiSupport from 'detect-emoji-support';
@@ -42,9 +42,9 @@ export default Component.extend({
 
     if (texts) {
       return EMOJI_BY_CATEGORIES.map(category => {
-        category.translate = texts[category.name];
+        set(category, 'translate', texts[category.name]);
         return category;
-      })
+      });
     }
 
     return EMOJI_BY_CATEGORIES
