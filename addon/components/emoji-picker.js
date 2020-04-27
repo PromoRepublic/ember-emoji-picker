@@ -4,7 +4,13 @@ import { bool } from '@ember/object/computed';
 import { htmlSafe } from '@ember/template';
 import layout from '../templates/components/emoji-picker';
 import detectEmojiSupport from 'detect-emoji-support';
-import { allEmoji, CATEGORIES, DEFAULT_TRANSLATIONS, EMOJI_BY_CATEGORIES, emojiHash } from '../data';
+import {
+  allEmoji,
+  CATEGORIES,
+  DEFAULT_TRANSLATIONS,
+  EMOJI_BY_CATEGORIES,
+  emojiHash
+} from '../data';
 import icons from '../svg';
 import { tryInvoke } from '@ember/utils';
 import { storageFor } from 'ember-local-storage/helpers/storage';
