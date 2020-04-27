@@ -1,6 +1,7 @@
 import Component from '@ember/component';
-import { computed, set } from '@ember/object';
+import { computed } from '@ember/object';
 import { bool } from '@ember/object/computed';
+import { htmlSafe } from '@ember/template';
 import layout from '../templates/components/emoji-picker';
 import detectEmojiSupport from 'detect-emoji-support';
 import { allEmoji, CATEGORIES, DEFAULT_TRANSLATIONS, EMOJI_BY_CATEGORIES, emojiHash } from '../data';
@@ -25,13 +26,13 @@ export default Component.extend({
     if (this.get('showRecent')) {
       categories.push({
         name: RECENT_KEY,
-        icon: icons[RECENT_KEY]
+        icon: htmlSafe(icons[RECENT_KEY])
       });
     }
 
     categories.push(...CATEGORIES.map(name => ({
       name,
-      icon: icons[name]
+      icon: htmlSafe(icons[name])
     })));
 
     return categories;
@@ -41,9 +42,10 @@ export default Component.extend({
     const texts = this.get('texts.categories');
 
     if (texts) {
-      return EMOJI_BY_CATEGORIES.map(category => {
-        set(category, 'translate', texts[category.name]);
-        return category;
+      return [...EMOJI_BY_CATEGORIES].map(category => {
+        return Object.assign(category, {
+          translate: texts[category.name]
+        });
       });
     }
 
