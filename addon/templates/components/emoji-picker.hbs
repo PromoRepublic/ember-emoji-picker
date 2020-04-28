@@ -38,39 +38,30 @@
 
     <div class="eep-select__sections{{unless isSearchMode " is-active"}}">
       {{#if showRecent}}
-        <div data-category="recent">
-          {{#emoji-picker/section category=recentEmoji texts=texts.categories}}
-            {{#each recentEmoji.emoji as |emoji|}}
-              <a class="eep-symbols__item eep-emoji-font" {{action "selectEmoji" emoji}}>
-                <span>{{emoji.char}}</span>
-              </a>
-            {{/each}}
-          {{/emoji-picker/section}}
-        </div>
+        {{#emoji-picker/section category=recentEmoji texts=texts.categories}}
+          {{#each recentEmoji.emoji as |emoji|}}
+            {{emoji-picker/symbol emoji=emoji click=(action "selectEmoji" emoji)}}
+          {{/each}}
+        {{/emoji-picker/section}}
       {{/if}}
 
-      <div class="js-emoji-sections-wrap">
+      {{!-Increasing UI performance-}}
+      {{#if renderAfterInsert}}
         {{#each emojiByCategories as |category|}}
-          <div
-              class="eep-select-section js-eep-select-section"
-              data-category={{category.name}}>
-            <div class="eep-select-section__name js-eep-select-section-name">
-              {{or category.translate category.name}}
-            </div>
-            <div class="eep-select-section__emoji">
-              <div class="eep-symbols">
-                {{#each category.emoji as |emoji|}}
-                  <a
-                      class="eep-symbols__item eep-emoji-font"
-                      {{action "selectEmoji" emoji}}>
-                    <span>{{emoji.char}}</span>
-                  </a>
-                {{/each}}
-              </div>
-            </div>
-          </div>
+          {{#emoji-picker/section category=category texts=texts.categories}}
+            {{#each category.emoji as |emoji|}}
+              {{emoji-picker/symbol emoji=emoji click=(action "selectEmoji" emoji)}}
+            {{/each}}
+          {{/emoji-picker/section}}
         {{/each}}
-      </div>
+      {{else}}
+        {{#emoji-picker/section category=firstCategory texts=texts.categories}}
+          {{#each firstCategory.emoji as |emoji|}}
+            {{emoji-picker/symbol emoji=emoji click=(action "selectEmoji" emoji)}}
+          {{/each}}
+        {{/emoji-picker/section}}
+      {{/if}}
+
     </div>
   </div>
 </div>

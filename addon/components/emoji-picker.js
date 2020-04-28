@@ -14,6 +14,8 @@ import {
 import icons from '../svg';
 import { tryInvoke } from '@ember/utils';
 import { storageFor } from 'ember-local-storage/helpers/storage';
+import { next } from '@ember/runloop';
+import { trySet } from '@ember/object';
 
 const RECENT_KEY = 'recent';
 
@@ -26,6 +28,12 @@ export default Component.extend({
   texts: undefined, // input
   showRecent: true, //input
   maxRecentCount: 21, // input
+
+  renderAfterInsert: false,
+
+  firstCategory: computed('emojiByCategories', function() {
+    return this.get('emojiByCategories')[0];
+  }),
 
   categories: computed('showRecent', function() {
     const categories = [];
@@ -44,18 +52,7 @@ export default Component.extend({
     return categories;
   }),
 
-  emojiByCategories: computed('texts.categories', function() {
-    const texts = this.get('texts.categories');
-
-    if (texts) {
-      return [...EMOJI_BY_CATEGORIES].map(category => {
-        Object.defineProperty(category, 'translate', { value: texts[category.name] })
-        return category;
-      });
-    }
-
-    return EMOJI_BY_CATEGORIES
-  }),
+  emojiByCategories: EMOJI_BY_CATEGORIES,
 
   activeCategory: RECENT_KEY,
   _searchQuery: null,
@@ -136,6 +133,7 @@ export default Component.extend({
 
   didInsertElement() {
     this._super(...arguments);
+    next(() => trySet(this, 'renderAfterInsert', true));
 
     const root = this.element.querySelector('.eep-select__scroller');
     root.addEventListener('scroll', this.handleScroll);
