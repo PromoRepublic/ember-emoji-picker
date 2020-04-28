@@ -142,7 +142,7 @@ export default Component.extend({
     root.addEventListener('scroll', this.handleScroll);
   },
 
-  didDestroyElement() {
+  willDestroyElement() {
     this._super(...arguments);
 
     const root = this.element.querySelector('.eep-select__scroller');
