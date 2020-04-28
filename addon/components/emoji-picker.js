@@ -138,7 +138,15 @@ export default Component.extend({
   didInsertElement() {
     this._super(...arguments);
 
-    this.buildObserver();
+    const root = this.element.querySelector('.eep-select__scroller');
+    root.addEventListener('scroll', this.handleScroll);
+  },
+
+  didDestroyElement() {
+    this._super(...arguments);
+
+    const root = this.element.querySelector('.eep-select__scroller');
+    root.removeEventListener('scroll', this.handleScroll);
   },
 
   _getRecentEmoji() {
@@ -150,27 +158,10 @@ export default Component.extend({
     this.set('recentEmoji', { name: RECENT_KEY, emoji });
   },
 
-  buildObserver() {
-    const root = this.element.querySelector('.eep-select__scroller');
-    const scrollElements = this.element.querySelectorAll('[data-category]');
-    const options = {
-      root,
-      rootMargin: "0px",
-      threshold: [.14],
-    };
-
-    const observer = new IntersectionObserver(this.handleScroll, options);
-    scrollElements.forEach(element => observer.observe(element));
-  },
-
-  /**
-   * @param entries {IntersectionObserverEntry[]}
-   * */
-  handleScroll(entries) {
-    const activeElement = entries.find(entry => entry.isIntersecting);
-    if (activeElement) {
-      this.set('activeCategory', activeElement.target.dataset.category);
-    }
+  handleScroll(scrollEvent) {
+    const categories = this.element.querySelectorAll('[data-category]');
+    const lastActive = [...categories].filter(category => category.offsetTop <= scrollEvent.target.scrollTop);
+    this.set('activeCategory', lastActive.pop().dataset.category);
   },
 
   _updateRecent(emoji) {
