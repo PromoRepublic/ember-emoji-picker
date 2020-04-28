@@ -1,3 +1,10 @@
-<div style="max-width: 400px; margin: 50px auto; box-shadow: 0 0 8px rgba(0,0,0,.2)">
-  <EmojiPicker/>
+<div>
+  {{show}}
+  <button type="button" {{on "click" (fn this.toggle)}}>toggle</button>
 </div>
+{{#if show}}
+  <div style="max-width: 400px; margin: 50px auto; box-shadow: 0 0 8px rgba(0,0,0,.2)">
+    <EmojiPicker/>
+  </div>
+{{/if}}
+

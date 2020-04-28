@@ -40,41 +40,34 @@
 
     <div class="eep-select__sections{{unless this.isSearchMode " is-active"}}">
       {{#if this.showRecent}}
-        <div data-category="recent">
-          <EmojiPicker::Section
-            @category={{this.recentEmoji}}
-            @texts={{@texts.categories}}>
-            {{#each this.recentEmoji.emoji as |emoji|}}
-              <a class="eep-symbols__item eep-emoji-font" {{on "click" (fn this.selectEmoji emoji)}}>
-                <span>{{emoji.char}}</span>
-              </a>
-            {{/each}}
-          </EmojiPicker::Section>
-        </div>
+        <EmojiPicker::Section
+          @category={{this.recentEmoji}}
+          @texts={{@texts.categories}}>
+          {{#each this.recentEmoji.emoji as |emoji|}}
+            <EmojiPicker::Symbol @emoji={{emoji}} @click={{fn this.selectEmoji emoji}}/>
+          {{/each}}
+        </EmojiPicker::Section>
       {{/if}}
 
-      <div class="js-emoji-sections-wrap">
+      {{!-Increasing UI performance-}}
+      {{#if this.renderAfterInsert}}
         {{#each this.emojiByCategories as |category|}}
-          <div
-              class="eep-select-section js-eep-select-section"
-              data-category={{category.name}}>
-            <div class="eep-select-section__name js-eep-select-section-name">
-              {{or category.translate category.name}}
-            </div>
-            <div class="eep-select-section__emoji">
-              <div class="eep-symbols">
-                {{#each category.emoji as |emoji|}}
-                  <a
-                      class="eep-symbols__item eep-emoji-font"
-                      {{on "click" (fn this.selectEmoji emoji)}}>
-                    <span>{{emoji.char}}</span>
-                  </a>
-                {{/each}}
-              </div>
-            </div>
-          </div>
+          <EmojiPicker::Section @category={{category}} @texts={{@texts.categories}}>
+            {{#each category.emoji as |emoji|}}
+              <EmojiPicker::Symbol @emoji={{emoji}} @click={{fn this.selectEmoji emoji}}/>
+            {{/each}}
+          </EmojiPicker::Section>
         {{/each}}
-      </div>
+      {{else}}
+        <EmojiPicker::Section @category={{this.firstCategory}} @texts={{@texts.categories}}>
+          {{#each this.firstCategory.emoji as |emoji|}}
+            <span class="eep-symbols__item eep-emoji-font">
+              <span>{{emoji.char}}</span>
+            </span>
+          {{/each}}
+        </EmojiPicker::Section>
+      {{/if}}
+
     </div>
   </div>
 </div>
