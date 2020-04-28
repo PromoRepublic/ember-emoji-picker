@@ -49,9 +49,8 @@ export default Component.extend({
 
     if (texts) {
       return [...EMOJI_BY_CATEGORIES].map(category => {
-        return Object.assign(category, {
-          translate: texts[category.name]
-        });
+        Object.defineProperty(category, 'translate', { value: texts[category.name] })
+        return category;
       });
     }
 
