@@ -156,6 +156,7 @@ export default Component.extend({
   },
 
   handleScroll(scrollEvent) {
+    if (this.get('isSearchMode')) return;
     const categories = this.element.querySelectorAll('[data-category]');
     const lastActive = [...categories].filter(category => category.offsetTop <= scrollEvent.target.scrollTop);
     this.set('activeCategory', lastActive.pop().dataset.category);
