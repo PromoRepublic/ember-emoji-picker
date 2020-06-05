@@ -1,12 +1,21 @@
 import Component from '@ember/component';
-import { run } from '@ember/runloop';
-import { computed, observer } from '@ember/object';
+import { computed } from '@ember/object';
+import { bool } from '@ember/object/computed';
+import { htmlSafe } from '@ember/template';
 import layout from '../templates/components/emoji-picker';
 import detectEmojiSupport from 'detect-emoji-support';
-import { allEmoji, CATEGORIES, DEFAULT_TRANSLATIONS, EMOJI_BY_CATEGORIES, emojiHash } from '../data';
+import {
+  allEmoji,
+  CATEGORIES,
+  DEFAULT_TRANSLATIONS,
+  EMOJI_BY_CATEGORIES,
+  emojiHash
+} from '../data';
 import icons from '../svg';
-import $ from 'jquery';
+import { tryInvoke } from '@ember/utils';
 import { storageFor } from 'ember-local-storage/helpers/storage';
+import { next } from '@ember/runloop';
+import { trySet } from '@ember/object';
 
 const RECENT_KEY = 'recent';
 
@@ -16,43 +25,36 @@ export default Component.extend({
   doesClientSupportsEmoji: detectEmojiSupport(),
   maxSearchResultsCount: 84,
 
-  showRecent: true,
-  maxRecentCount: 21,
+  texts: undefined, // input
+  showRecent: true, //input
+  maxRecentCount: 21, // input
 
-  init() {
-    this._super(...arguments);
+  renderAfterInsert: false,
 
-    const
-      emojiByCategories = EMOJI_BY_CATEGORIES,
-      categories = [];
+  firstCategory: computed('emojiByCategories', function() {
+    return this.get('emojiByCategories')[0];
+  }),
 
+  categories: computed('showRecent', function() {
+    const categories = [];
     if (this.get('showRecent')) {
-      this._getRecentEmoji();
-
       categories.push({
         name: RECENT_KEY,
-        icon: icons[RECENT_KEY]
+        icon: htmlSafe(icons[RECENT_KEY])
       });
     }
 
     categories.push(...CATEGORIES.map(name => ({
       name,
-      icon: icons[name]
+      icon: htmlSafe(icons[name])
     })));
 
-    this.setProperties(Object.assign({}, {
-      emojiByCategories,
-      categories,
-    }));
+    return categories;
+  }),
 
-    if (!this.get('texts')) {
-      this.set('texts', DEFAULT_TRANSLATIONS);
-    }
+  emojiByCategories: EMOJI_BY_CATEGORIES,
 
-    this._checkScroll = this._checkScroll.bind(this);
-  },
-
-  _activeCategory: 0,
+  activeCategory: RECENT_KEY,
   _searchQuery: null,
   _searchQueryFormatted: computed('_searchQuery', function() {
     const querySrc = this.get('_searchQuery');
@@ -65,33 +67,13 @@ export default Component.extend({
     return formatString(query);
   }),
 
-  _isSearchMode: computed('_searchQueryFormatted', function() {
-    return !!this.get('_searchQueryFormatted');
-  }),
-
-  _searchObserver: observer('_isSearchMode', function() {
-    //for nano scroll
-    run.next(() => $(window).trigger('resize'));
-
-    this.get('$scroller').scrollTop(0);
-
-    if (!this.get('_isSearchMode')) {
-      this.set('_activeCategory', 0);
-      this._onLeaveSearch();
-    }
-  }),
-
-  _onLeaveSearch() {
-    this._getRecentEmoji();
-  },
+  isSearchMode: bool('_searchQueryFormatted'),
 
   _searchResults: computed('_searchQueryFormatted', function() {
     const query = this.get('_searchQueryFormatted');
+    const scores = {};
 
     if (!query) return;
-
-    const
-      scores = {};
 
     allEmoji
       .forEach(emoji => {
@@ -135,6 +117,35 @@ export default Component.extend({
       .slice(0, this.get('maxSearchResultsCount'));
   }),
 
+  init() {
+    this._super(...arguments);
+
+    if (this.get('showRecent')) {
+      this._getRecentEmoji();
+    }
+
+    if (!this.get('texts')) {
+      this.set('texts', DEFAULT_TRANSLATIONS);
+    }
+
+    this.handleScroll = this.handleScroll.bind(this);
+  },
+
+  didInsertElement() {
+    this._super(...arguments);
+    next(() => trySet(this, 'renderAfterInsert', true));
+
+    const root = this.element.querySelector('.eep-select__scroller');
+    root.addEventListener('scroll', this.handleScroll);
+  },
+
+  willDestroyElement() {
+    this._super(...arguments);
+
+    const root = this.element.querySelector('.eep-select__scroller');
+    root.removeEventListener('scroll', this.handleScroll);
+  },
+
   _getRecentEmoji() {
     const emoji = Object.entries(this.get('recent.content'))
       .sort((entry1, entry2) => entry2[1] - entry1[1])
@@ -144,95 +155,21 @@ export default Component.extend({
     this.set('recentEmoji', { name: RECENT_KEY, emoji });
   },
 
-  didInsertElement() {
-    this._super(...arguments);
-
-    this.renderAllEmojisList();
-
-    const
-      $scroller = this.$('.nano-content'),
-      $categories = this.$('.js-eep-select-section');
-
-    this.setProperties({
-      $scroller,
-      $categories
-    });
-
-    $scroller.on('scroll', this._checkScroll);
-
-    //refresh nanoscroller
-    $('.nano').nanoScroller();
-  },
-
-  renderAllEmojisList() {
-    const
-      dom = document.createDocumentFragment(),
-      texts = this.get('texts');
-
-    const emojiByCategories = this.get('emojiByCategories');
-
-    for (let i = 0; i < emojiByCategories.length; i++) {
-      const
-        category = emojiByCategories[i],
-        emojis = category.emoji,
-        section = document.createElement('div'),
-        categoryName = texts && texts.categories && texts.categories[category.name] || category.name;
-
-      section.setAttribute('class', 'eep-select-section js-eep-select-section');
-
-      section.innerHTML = `
-        <div class="eep-select-section__name js-eep-select-section-name">${categoryName}</div>
-        <div class="eep-select-section__emoji">
-          <div class="eep-symbols">
-
-          </div>
-        </div>
-      `;
-
-      const symbolsWrapper = section.querySelector('.eep-symbols');
-
-      for (let i = 0; i < emojis.length; i++) {
-        const
-          emoji = emojis[i],
-          element = document.createElement('div');
-
-        element.setAttribute('class', 'eep-symbols__item eep-emoji-font');
-        element.addEventListener('click', () => this.send('selectEmoji', emoji));
-        element.innerHTML = `<span>${emoji.char}</span>`;
-
-        symbolsWrapper.appendChild(element);
-      }
-
-      dom.appendChild(section);
-    }
-
-    this.$('.js-emoji-sections-wrap').get(0).appendChild(dom);
-  },
-
-  _checkScroll() {
-    if (this.get('_isSearchMode')) return;
-
-    const $categories = this.get('$categories');
-    let activeCategory = 0;
-
-    $categories.each((i, element) => {
-      if ($(element).position().top <= 2) {
-        activeCategory = i;
-      }
-    });
-
-    this.set('_activeCategory', activeCategory);
+  handleScroll(scrollEvent) {
+    if (this.get('isSearchMode')) return;
+    const categories = this.element.querySelectorAll('[data-category]');
+    const lastActive = [...categories].filter(category => category.offsetTop <= scrollEvent.target.scrollTop);
+    const lastCategory = lastActive.pop();
+    this.set('activeCategory', lastCategory ? lastCategory.dataset.category : undefined);
   },
 
   _updateRecent(emoji) {
-    const
-      stored = this.get('recent.content'),
-      timeStamp = Date.now();
+    const stored = this.get('recent.content');
+    const timeStamp = Date.now();
 
     stored[emoji.name] = timeStamp;
 
-    const
-      entries = Object.entries(stored);
+    const entries = Object.entries(stored);
 
     if (entries.length > this.get('maxRecentCount')) {
       const sorted = entries.sort((entry1, entry2) => entry2[1] - entry1[1]);
@@ -250,26 +187,25 @@ export default Component.extend({
 
   actions: {
     selectEmoji(emoji) {
-      this.sendAction('onSelectEmoji', emoji);
+      tryInvoke(this, 'onSelectEmoji', [emoji]);
 
       this._updateRecent(emoji);
     },
 
-    navigate(categoryIndex) {
+    navigate(categoryName) {
       this._getRecentEmoji();
 
-      const
-        { $scroller, $categories } = this.getProperties('$scroller', '$categories'),
-        scrollToCategory = () => {
-          $scroller.scrollTop($categories.eq(categoryIndex).position().top + $scroller.scrollTop());
-        };
-
-      if (this.get('_isSearchMode')) {
+      if (this.get('isSearchMode')) {
         this.set('_searchQuery', null);
-        this._onLeaveSearch();
-        run.next(scrollToCategory);
-      } else {
-        scrollToCategory();
+      }
+
+      const target = this.element.querySelector(`[data-category="${categoryName}"]`);
+      if (target) target.scrollIntoView({behavior: 'smooth'});
+    },
+    triggerSearch(value) {
+      if (!value) {
+        this._getRecentEmoji();
+        this.element.querySelector('[data-category="recent"]').scrollIntoView();
       }
     }
   },
