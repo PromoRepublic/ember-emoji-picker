@@ -1,5 +1,5 @@
 import Component from '@ember/component';
-import { computed } from '@ember/object';
+import { computed, action } from '@ember/object';
 import { bool } from '@ember/object/computed';
 import { htmlSafe } from '@ember/template';
 import layout from '../templates/components/emoji-picker';
@@ -32,7 +32,9 @@ export default Component.extend({
   renderAfterInsert: false,
 
   firstCategory: computed('emojiByCategories', function() {
-    return this.get('emojiByCategories')[0];
+    const category = this.get('emojiByCategories')[0];
+    const emoji = category.emoji.slice(0, 40);
+    return { name: category.name, emoji };
   }),
 
   categories: computed('showRecent', function() {
@@ -185,28 +187,30 @@ export default Component.extend({
     }
   },
 
-  actions: {
-    selectEmoji(emoji) {
-      tryInvoke(this, 'onSelectEmoji', [emoji]);
+  @action
+  navigate(categoryName) {
+    this._getRecentEmoji();
 
-      this._updateRecent(emoji);
-    },
+    if (this.get('isSearchMode')) {
+      this.set('_searchQuery', null);
+    }
 
-    navigate(categoryName) {
+    const target = this.element.querySelector(`[data-category="${categoryName}"]`);
+    if (target) target.scrollIntoView({behavior: 'smooth'});
+  },
+
+  @action
+  selectEmoji(emoji) {
+    tryInvoke(this, 'onSelectEmoji', [emoji]);
+
+    this._updateRecent(emoji);
+  },
+
+  @action
+  triggerSearch(value) {
+    if (!value) {
       this._getRecentEmoji();
-
-      if (this.get('isSearchMode')) {
-        this.set('_searchQuery', null);
-      }
-
-      const target = this.element.querySelector(`[data-category="${categoryName}"]`);
-      if (target) target.scrollIntoView({behavior: 'smooth'});
-    },
-    triggerSearch(value) {
-      if (!value) {
-        this._getRecentEmoji();
-        this.element.querySelector('[data-category="recent"]').scrollIntoView();
-      }
+      this.element.querySelector('[data-category="recent"]').scrollIntoView();
     }
   },
 

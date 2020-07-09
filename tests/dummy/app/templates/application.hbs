@@ -1,24 +1,10 @@
 <div>
   {{show}}
-  <button type="button" {{action "toggle"}}>toggle</button>
+  <button type="button" {{on "click" (fn this.toggle)}}>toggle</button>
 </div>
-<div style="max-width: 400px; margin: 50px auto; box-shadow: 0 0 8px rgba(0,0,0,.2)">
-  {{#if show}}
-    {{emoji-picker texts=(hash
-            noFound="emoji-picker.noFound"
-            searchResults="emoji-picker.searchResults"
-            searchPlaceholder="emoji-picker.searchPlaceholder"
-            categories=(hash
-            recent="emoji-picker.categories.recent"
-            people="emoji-picker.categories.people"
-            animals_and_nature="emoji-picker.categories.animals_and_nature"
-            food_and_drink="emoji-picker.categories.food_and_drink"
-            activity="emoji-picker.categories.activity"
-            travel_and_places="emoji-picker.categories.travel_and_places"
-            objects="emoji-picker.categories.objects"
-            symbols="emoji-picker.categories.symbols"
-            flags="emoji-picker.categories.flags"
-        )
-        )}}
-  {{/if}}
-</div>
+{{#if show}}
+  <div style="max-width: 400px; margin: 50px auto; box-shadow: 0 0 8px rgba(0,0,0,.2)">
+    <EmojiPicker/>
+  </div>
+{{/if}}
+

@@ -1,10 +1,11 @@
 import Controller from '@ember/controller';
+import { action } from '@ember/object';
 
 export default Controller.extend({
   show: true,
-  actions: {
-    toggle() {
-      this.toggleProperty('show');
-    }
+
+  @action
+  toggle() {
+    this.toggleProperty('show');
   }
 });
