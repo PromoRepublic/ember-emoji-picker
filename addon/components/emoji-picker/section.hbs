@@ -1,0 +1,17 @@
+<div
+    data-category={{@category.name}}
+    class="eep-select-section">
+  <div class="eep-select-section__name js-eep-select-section-name">
+    {{#if (and @texts (get @texts @category.name))}}
+      {{get @texts @category.name}}
+    {{else}}
+      {{@category.name}}
+    {{/if}}
+  </div>
+
+  <div class="eep-select-section__emoji">
+    <div class="eep-symbols">
+      {{yield}}
+    </div>
+  </div>
+</div>
