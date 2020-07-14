@@ -1,37 +1,38 @@
-<div class="eep-select">
+<div
+    class="eep-select"
+  {{did-insert this.didInsertHandler}}>
   <div class="eep-select__navigation">
     <div class="eep-nav{{if this.isSearchMode " eep-nav--search"}}">
       {{#each this.categories as |category|}}
           <EmojiPicker::NavItem
               @category={{category}}
               @isActive={{and (not this.isSearchMode) (eq category.name this.activeCategory)}}
-              @click={{fn this.navigate category.name}}/>
+              {{on "click" (fn this.navigate category.name)}}/>
       {{/each}}
     </div>
   </div>
 
   <EmojiPicker::Form
+      placeholder={{this.texts.searchPlaceholder}}
       @value={{this._searchQuery}}
-      @placeholder={{@texts.searchPlaceholder}}
-      @onChange={{fn this.triggerSearch}}
-  />
+      {{on "change" this.triggerSearch}}/>
 
   <div class="eep-select__scroller">
     <div class="eep-select__sections{{if this.isSearchMode " is-active"}}">
       <div class="eep-select-section">
-        <div class="eep-select-section__name">{{@texts.searchResults}}:</div>
+        <div class="eep-select-section__name">{{this.texts.searchResults}}:</div>
         <div class="eep-select-section__emoji">
           {{#if this._searchResults}}
             <div class="eep-symbols">
               {{#each this._searchResults as |emoji|}}
                   <EmojiPicker::Symbol
                       @emoji={{emoji}}
-                      @click={{fn this.selectEmoji emoji}}/>
+                    {{on "click" (fn this.selectEmoji emoji)}}/>
               {{/each}}
             </div>
           {{else}}
             <div class="eep-symbols eep-symbols--no-found">
-              {{@texts.noFound}}
+              {{this.texts.noFound}}
             </div>
           {{/if}}
         </div>
@@ -42,9 +43,9 @@
       {{#if this.showRecent}}
         <EmojiPicker::Section
           @category={{this.recentEmoji}}
-          @texts={{@texts.categories}}>
+          @texts={{this.texts.categories}}>
           {{#each this.recentEmoji.emoji as |emoji|}}
-            <EmojiPicker::Symbol @emoji={{emoji}} @click={{fn this.selectEmoji emoji}}/>
+            <EmojiPicker::Symbol @emoji={{emoji}} {{on "click" (fn this.selectEmoji emoji)}}/>
           {{/each}}
         </EmojiPicker::Section>
       {{/if}}
@@ -52,14 +53,14 @@
       {{!-Increasing UI performance-}}
       {{#if this.renderAfterInsert}}
         {{#each this.emojiByCategories as |category|}}
-          <EmojiPicker::Section @category={{category}} @texts={{@texts.categories}}>
+          <EmojiPicker::Section @category={{category}} @texts={{this.texts.categories}}>
             {{#each category.emoji as |emoji|}}
-              <EmojiPicker::Symbol @emoji={{emoji}} @click={{fn this.selectEmoji emoji}}/>
+              <EmojiPicker::Symbol @emoji={{emoji}} {{on "click" (fn this.selectEmoji emoji)}}/>
             {{/each}}
           </EmojiPicker::Section>
         {{/each}}
       {{else}}
-        <EmojiPicker::Section @category={{this.firstCategory}} @texts={{@texts.categories}}>
+        <EmojiPicker::Section @category={{this.firstCategory}} @texts={{this.texts.categories}}>
           {{#each this.firstCategory.emoji as |emoji|}}
             <span class="eep-symbols__item eep-emoji-font">
               <span>{{emoji.char}}</span>
