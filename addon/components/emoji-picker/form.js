@@ -1,6 +1,6 @@
 import Component from '@ember/component';
 import layout from '../../templates/components/emoji-picker/form';
-import { computed } from '@ember/object';
+import { action, computed } from '@ember/object';
 
 export default Component.extend({
   tagName: 'label',
@@ -14,5 +14,12 @@ export default Component.extend({
 
     return classString;
   }),
+
+  inputHandler: action(function(event) {
+    if (typeof this.onChange === 'function') {
+      this.onChange(event.target.value);
+    }
+  }),
+
   layout
 });

@@ -1,7 +1,7 @@
-<Input
+<input
     type="text"
-    @class={{this._class}}
-    @placeholder={{@placeholder}}
-    @value={{@value}}
-    @keyUp={{fn @onChange}}
+    class={{this._class}}
+    placeholder={{@placeholder}}
+    value={{@value}}
+    {{on "input" this.inputHandler}}
 />

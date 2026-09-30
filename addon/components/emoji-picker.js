@@ -12,7 +12,6 @@ import {
   emojiHash
 } from '../data';
 import icons from '../svg';
-import { tryInvoke } from '@ember/utils';
 import { storageFor } from 'ember-local-storage/helpers/storage';
 import { next } from '@ember/runloop';
 import { trySet } from '@ember/object';
@@ -201,13 +200,17 @@ export default Component.extend({
 
   @action
   selectEmoji(emoji) {
-    tryInvoke(this, 'onSelectEmoji', [emoji]);
+    if (typeof this.onSelectEmoji === 'function') {
+      this.onSelectEmoji(emoji);
+    }
 
     this._updateRecent(emoji);
   },
 
   @action
   triggerSearch(value) {
+    this.set('_searchQuery', value);
+
     if (!value) {
       this._getRecentEmoji();
       this.element.querySelector('[data-category="recent"]').scrollIntoView();
