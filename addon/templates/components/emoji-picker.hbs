@@ -49,7 +49,7 @@
         </EmojiPicker::Section>
       {{/if}}
 
-      {{!-Increasing UI performance-}}
+      {{!-- Increasing UI performance --}}
       {{#if this.renderAfterInsert}}
         {{#each this.emojiByCategories as |category|}}
           <EmojiPicker::Section @category={{category}} @texts={{@texts.categories}}>
